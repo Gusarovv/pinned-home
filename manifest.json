@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "pinned-home",
+  "version": "0.3.0",
+  "description": "Arc-style pinned tabs: a pinned tab remembers its home URL and returns to it",
+  "minimum_chrome_version": "126",
+  "incognito": "not_allowed",
+  "permissions": ["tabs", "storage"],
+  "background": { "service_worker": "background.js" },
+  "icons": { "16": "pin-home-16.png", "32": "pin-home-32.png", "48": "pin-home-48.png", "128": "pin-home-128.png" },
+  "action": {
+    "default_title": "pinned-home",
+    "default_icon": { "16": "pin-home-16.png", "24": "pin-home-24.png", "32": "pin-home-32.png" }
+  },
+  "commands": {
+    "reset": { "suggested_key": { "default": "Alt+R" }, "description": "Return the pinned tab to its home URL" },
+    "detach": { "suggested_key": { "default": "Alt+Shift+D" }, "description": "Open the current page in a new tab and return the pinned tab home" }
+  }
+}

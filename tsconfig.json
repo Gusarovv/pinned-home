@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es2024",
+    "module": "preserve",
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "strict": true,
+    "types": ["chrome", "node"]
+  },
+  "include": ["src", "test"]
+}
