@@ -28,6 +28,14 @@ function recordOf(state: State, tabId: number): PinRecord | undefined {
   return state.pins.find((pin) => pin.id === state.bindings[tabId]);
 }
 
+/** Creates a record with the URL as home and binds the tab to it */
+function addRecord(state: State, tabId: number, url: string, index: number): PinRecord {
+  const record = { id: crypto.randomUUID(), homeUrl: url, lastUrl: url, index };
+  state.pins.push(record);
+  state.bindings[tabId] = record.id;
+  return record;
+}
+
 /** Binds unbound pinned tabs to free records and paints them, safe to call repeatedly */
 async function reconcile(state: State): Promise<void> {
   const recordIds = new Set(state.pins.map((pin) => pin.id));
@@ -83,11 +91,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     mutate(async (state) => {
       // A bound tab still on its lastUrl is treated as moved between windows, any other binding as reconcile taking a new pin for a restored tab
       let record = recordOf(state, tabId);
-      if (record?.lastUrl !== url) {
-        record = { id: crypto.randomUUID(), homeUrl: url, lastUrl: url, index: tab.index };
-        state.pins.push(record);
-        state.bindings[tabId] = record.id;
-      }
+      if (record?.lastUrl !== url) record = addRecord(state, tabId, url, tab.index);
       await paint(tabId, url, record);
     }).catch(console.error);
   } else if (changeInfo.pinned === false) {
@@ -132,6 +136,17 @@ chrome.tabs.onReplaced.addListener((addedTabId, removedTabId) => {
 chrome.tabs.onRemoved.addListener((tabId) => {
   mutate((state) => {
     delete state.bindings[tabId];
+  }).catch(console.error);
+});
+
+// Tabs pinned before the install take their current URL as home, so the shortcut works right away
+chrome.runtime.onInstalled.addListener(({ reason }) => {
+  if (reason !== 'install') return;
+  mutate(async (state) => {
+    for (const tab of await chrome.tabs.query({ pinned: true })) {
+      if (tab.id === undefined || !isWebUrl(tab.url) || recordOf(state, tab.id)) continue;
+      await paint(tab.id, tab.url, addRecord(state, tab.id, tab.url, tab.index));
+    }
   }).catch(console.error);
 });
 

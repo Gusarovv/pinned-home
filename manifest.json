@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "pinned-home",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Arc-style pinned tabs: a pinned tab remembers its home URL and returns to it",
   "minimum_chrome_version": "126",
   "incognito": "not_allowed",
